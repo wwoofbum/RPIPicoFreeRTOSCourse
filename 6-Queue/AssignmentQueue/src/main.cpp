@@ -16,6 +16,8 @@
 #include "BlinkAgent.h"
 #include "CounterAgent.h"
 
+#include "main.h"
+
 
 //Standard Task priority
 #define TASK_PRIORITY		( tskIDLE_PRIORITY + 1UL )
@@ -26,6 +28,8 @@
 #define LED2_PAD			3
 #define LED3_PAD			4
 #define LED4_PAD			5
+
+
 
 
 void runTimeStats(   ){
@@ -66,7 +70,7 @@ void runTimeStats(   ){
 	   printf("Failed to allocate space for stats\n");
    }
 
-   //Get heap allocation information
+   //Get heap allocation informati
    HeapStats_t heapStats;
    vPortGetHeapStats(&heapStats);
    printf("HEAP avl: %d, blocks %d, alloc: %d, free: %d\n",
@@ -83,9 +87,17 @@ void runTimeStats(   ){
  * @param params - unused
  */
 void mainTask(void *params){
+	QueueHandle_t myQ;
+	myQ = xQueueCreate( COUNT_QUEUE_LEN, sizeof(CounterCmd));
 	BlinkAgent blink(LED_PAD);
-	CounterAgent counter(LED1_PAD, LED2_PAD, LED3_PAD, LED4_PAD);
+	CounterAgent counter(LED1_PAD, LED2_PAD, LED3_PAD, LED4_PAD, myQ);
 
+	// Set up command
+	BaseType_t res;
+	CounterCmd cmd;
+	cmd.action = CounterOn;
+	cmd.count = 0x0F;
+	
 	printf("Main task started\n");
 
 	blink.start("Blink", TASK_PRIORITY);
@@ -96,6 +108,14 @@ void mainTask(void *params){
 		uint8_t r = rand() & 0x0F;
 		counter.blink(r);
 		printf("Blinking R=0x%X\n", r);
+		vTaskDelay(3000);
+		// Sent the all on command
+		if(myQ != NULL) {
+			res = xQueueSendToBack(myQ, (void *)&cmd, 0);
+			if (res != pdTRUE) {
+				printf("Warning: Queu is full, boy\n");
+			}
+		}
 		vTaskDelay(3000);
 	}
 }

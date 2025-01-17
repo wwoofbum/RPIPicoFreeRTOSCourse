@@ -57,7 +57,7 @@ int main() {
 
 	//Initialise IO as we are using printf for debug
 	stdio_init_all();
-	sleep_ms(2000);
+	sleep_ms(10 * 1000);
 	printf("Start\n");
 
 	TaskHandle_t task;

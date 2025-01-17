@@ -8,6 +8,9 @@
 #include "CounterAgent.h"
 #include "stdio.h"
 
+#include "main.h"
+
+/* These are now defined in main.h 
 //Local enumerator of the actions to be queued
 enum CounterAction {CounterOff, CounterOn, CounterBlink};
 
@@ -16,6 +19,7 @@ struct CounterCmd {
 	CounterAction 	action;
 	uint8_t 		count;
 };
+*/
 
 //Type def for the queue command
 typedef struct CounterCmd CounterCmdT;
@@ -27,17 +31,22 @@ typedef struct CounterCmd CounterCmdT;
  * @param gp3 GPIO PAD for 1st LED - 4
  * @param gp4 GPIO PAD for 1st LED - 8
  */
-CounterAgent::CounterAgent(uint8_t gp1, uint8_t gp2, uint8_t gp3, uint8_t gp4) {
+CounterAgent::CounterAgent(uint8_t gp1, uint8_t gp2, uint8_t gp3, uint8_t gp4, QueueHandle_t CmdQ) {
 
 	pLedPads[0] = gp1;
 	pLedPads[1] = gp2;
 	pLedPads[2] = gp3;
 	pLedPads[3] = gp4;
 
+/* ** Can I use the passed queue handle rather than one defined here
 	xCmdQ = xQueueCreate( COUNT_QUEUE_LEN, sizeof(CounterCmd));
 	if (xCmdQ == NULL){
 		printf("ERROR: Unable to create Queue\n");
 	}
+
+*/
+	// Assign local queue handle to the one passed in
+	xCmdQ = CmdQ;
 }
 
 
@@ -89,7 +98,7 @@ void CounterAgent::init(){
 		} else {
 			change = false;
 		}
-
+		
 		switch(action){
 		case CounterOff:
 			if (change){
@@ -102,13 +111,16 @@ void CounterAgent::init(){
 			}
 			break;
 		case CounterBlink:
-			blinkOn = ! blinkOn;
-			if (blinkOn){
-				setLeds(count);
-			} else {
-				setLeds(0);
-			}
+			
+				blinkOn = ! blinkOn;
+				if (blinkOn){
+					setLeds(count);
+				} else {
+					setLeds(0);
+				}
+			
 		}
+		
 	}
 
 }
@@ -193,5 +205,5 @@ void CounterAgent::blink(uint8_t count){
 		}
 	}
 }
-
+  
 

@@ -19,19 +19,13 @@
 
 #define COUNT_LEDS 			4
 #define COUNT_QUEUE_LEN 	10
-#define COUNT_BLINK_DELAY 	500
+// delay for blinking count
+#define COUNT_BLINK_DELAY 	250
 
 class CounterAgent : public Agent {
 public:
 
-	/***
-	 * Contructor
-	 * @param gp1 GPIO PAD for 1st LED - units
-	 * @param gp2 GPIO PAD for 1st LED - 2
-	 * @param gp3 GPIO PAD for 1st LED - 4
-	 * @param gp4 GPIO PAD for 1st LED - 8
-	 */
-	CounterAgent(uint8_t gp1=0, uint8_t gp2=0, uint8_t gp3=0, uint8_t gp4=0);
+	CounterAgent(uint8_t gp1=0, uint8_t gp2=0, uint8_t gp3=0, uint8_t gp4=0, QueueHandle_t CmdQ=NULL);
 
 	/***
 	 * Destructor
@@ -86,6 +80,9 @@ protected:
 
 	//Queue of commands
 	QueueHandle_t xCmdQ;
+
+	// Bogus queue 
+	QueueHandle_t yCmdQ;
 
 };
 
